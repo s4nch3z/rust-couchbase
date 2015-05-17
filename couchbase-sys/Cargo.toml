@@ -1,0 +1,10 @@
+[package]
+name = "couchbase-sys"
+version = "0.1.0"
+authors = ["Alexander Prokopyev <xana4ok@gmail.com>"]
+license = "MIT"
+description = "Low-level bindings to the couchbase library"
+repository = "https://github.com/s4nch3z/rust-couchbase"
+
+[dependencies]
+libc = "*"
