@@ -6,5 +6,6 @@ license = "MIT"
 description = "High-level bindings to the couchbase library"
 repository = "https://github.com/s4nch3z/rust-couchbase"
 
-#[dependencies]
+[dependencies]
+libc = "*"
 #couchbase-sys = "0.1.0"

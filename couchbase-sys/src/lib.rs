@@ -1,7 +1,7 @@
 extern crate libc;
 
 pub use ffi::{
-	// lcb_create,
+	lcb_create,
  //    lcb_connect,
  //    lcb_set_cookie,
  //    lcb_get_cookie,
@@ -73,12 +73,57 @@ pub use ffi::{
 
 #[allow(non_camel_case_types)]
 mod ffi {
-    // use libc::{
-    //     uint8_t,
-    //     uint16_t,
-    //     int32_t,
-    //     size_t,
-    // };
+    use libc::{
+	    c_int,
+	    c_uint,
+	    c_char,
+	    uint8_t,
+	    uint16_t,
+	    uint32_t,
+	    uint64_t,
+	    int16_t,
+	    int32_t,
+	    int64_t,
+	    size_t,
+	    ssize_t,
+	    c_void,
+	    time_t,
+	    FILE,
+	    c_short,
+	};
+
+	use std::option::Option;
+	use std::clone::Clone;
+	use std::default::Default;
+	use std::mem::{
+	    transmute,
+	    zeroed,
+	};
+
+	// Basic type definitions
+	pub type lcb_int32_t = int32_t;
+	pub type lcb_int64_t = int64_t;
+	pub type lcb_size_t = size_t;
+	pub type lcb_ssize_t = ssize_t;
+	pub type lcb_vbucket_t = uint16_t;
+	pub type lcb_uint8_t = uint8_t;
+	pub type lcb_uint16_t = uint16_t;
+	pub type lcb_uint32_t = uint32_t;
+	pub type lcb_uint64_t = uint64_t;
+	pub type lcb_cas_t = uint64_t;
+	pub type lcb_time_t = time_t;
+
+	pub type lcb_S64 = lcb_int64_t;
+	pub type lcb_U64 = lcb_uint64_t;
+	pub type lcb_U32 = lcb_uint32_t;
+	pub type lcb_S32 = lcb_int32_t;
+	pub type lcb_U16 = lcb_uint16_t;
+	pub type lcb_U8 = lcb_uint8_t;
+	pub type lcb_SIZE = lcb_size_t;
+	pub type lcb_SSIZE = lcb_ssize_t;
+	pub type lcb_SECS = lcb_time_t;
+	pub type lcb_CAS = lcb_cas_t;
 
     include!("ffi.rs");
+    include!("iops_ffi.rs");
 }

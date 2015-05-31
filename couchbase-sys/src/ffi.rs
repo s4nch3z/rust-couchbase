@@ -1,53 +1,3 @@
-use libc::{
-    c_int,
-    c_uint,
-    c_char,
-    uint8_t,
-    uint16_t,
-    uint32_t,
-    uint64_t,
-    int16_t,
-    int32_t,
-    int64_t,
-    size_t,
-    ssize_t,
-    c_void,
-    time_t,
-    FILE,
-};
-
-use std::option::Option;
-use std::clone::Clone;
-use std::default::Default;
-use std::mem::{
-    transmute,
-    zeroed,
-};
-
-// Basic type definitions
-pub type lcb_int32_t = int32_t;
-pub type lcb_int64_t = int64_t;
-pub type lcb_size_t = size_t;
-pub type lcb_ssize_t = ssize_t;
-pub type lcb_vbucket_t = uint16_t;
-pub type lcb_uint8_t = uint8_t;
-pub type lcb_uint16_t = uint16_t;
-pub type lcb_uint32_t = uint32_t;
-pub type lcb_uint64_t = uint64_t;
-pub type lcb_cas_t = uint64_t;
-pub type lcb_time_t = time_t;
-
-pub type lcb_S64 = lcb_int64_t;
-pub type lcb_U64 = lcb_uint64_t;
-pub type lcb_U32 = lcb_uint32_t;
-pub type lcb_S32 = lcb_int32_t;
-pub type lcb_U16 = lcb_uint16_t;
-pub type lcb_U8 = lcb_uint8_t;
-pub type lcb_SIZE = lcb_size_t;
-pub type lcb_SSIZE = lcb_ssize_t;
-pub type lcb_SECS = lcb_time_t;
-pub type lcb_CAS = lcb_cas_t;
-
 // Enumerations
 pub enum lcb_CALLBACKTYPE {
     LCB_CALLBACK_DEFAULT = 0,
@@ -124,7 +74,7 @@ pub enum lcb_replica_t {
     LCB_REPLICA_ALL = 0x01,
     LCB_REPLICA_SELECT = 0x02,
 }
-pub enum lcb_GETNODETYPE{
+pub enum lcb_GETNODETYPE {
     LCB_NODE_HTCONFIG = 0x01,
     LCB_NODE_DATA = 0x02,
     LCB_NODE_VIEWS = 0x04,
@@ -242,10 +192,6 @@ pub enum lcb_error_t {
     LCB_UNKNOWN_MEMCACHED_ERROR = 0x3D,
     LCB_MUTATION_LOST = 0x3E,
     LCB_MAX_ERROR = 0x1000,
-}
-pub enum lcb_iomodel_t{
-    LCB_IOMODEL_EVENT,
-    LCB_IOMODEL_COMPLETION,
 }
 pub enum lcb_KVBUFTYPE {
     LCB_KV_COPY = 0,
@@ -454,52 +400,6 @@ pub enum lcb_config_transport_t {
 // lcb_RESPUNLOCK : api3.h
 
 
-
-// lcb_io_connect_cb : iops.h
-// lcb_io_create_fn : iops.h
-// lcb_io_procs_fn : iops.h
-// lcb_io_start_fn : iops.h
-// lcb_io_stop_fn : iops.h
-// lcb_io_tick_fn : iops.h
-// lcb_io_timer_cancel_fn : iops.h
-// lcb_io_timer_create_fn : iops.h
-// lcb_io_timer_destroy_fn : iops.h
-// lcb_io_timer_schedule_fn : iops.h
-// lcb_ioC_chkclosed_fn : iops.h
-// lcb_ioC_close_fn : iops.h
-// lcb_ioC_cntl_fn : iops.h
-// lcb_ioC_connect_fn : iops.h
-// lcb_ioC_nameinfo_fn : iops.h
-// lcb_ioC_read2_callback : iops.h
-// lcb_ioC_read2_fn : iops.h
-// lcb_ioC_read_callback : iops.h
-// lcb_ioC_read_fn : iops.h
-// lcb_ioC_serve_callback : iops.h
-// lcb_ioC_serve_fn : iops.h
-// lcb_ioC_socket_fn : iops.h
-// lcb_ioC_wballoc_fn : iops.h
-// lcb_ioC_wbfree_fn : iops.h
-// lcb_ioC_write2_callback : iops.h
-// lcb_ioC_write2_fn : iops.h
-// lcb_ioC_write_callback : iops.h
-// lcb_ioC_write_fn : iops.h
-// lcb_ioE_callback : iops.h
-// lcb_ioE_chkclosed_fn : iops.h
-// lcb_ioE_close_fn : iops.h
-// lcb_ioE_cntl_fn : iops.h
-// lcb_ioE_connect_fn : iops.h
-// lcb_ioE_event_cancel_fn : iops.h
-// lcb_ioE_event_create_fn : iops.h
-// lcb_ioE_event_destroy_fn : iops.h
-// lcb_ioE_event_watch_fn : iops.h
-// lcb_ioE_recv_fn : iops.h
-// lcb_ioE_recvv_fn : iops.h
-// lcb_ioE_send_fn : iops.h
-// lcb_ioE_sendv_fn : iops.h
-// lcb_ioE_socket_fn : iops.h
-// lcb_socket_t : iops.h
-
-
 // lcb_logging_callback : cntl.h
 
 
@@ -508,87 +408,13 @@ pub enum lcb_config_transport_t {
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_st;
+impl Clone for lcb_st {
+    fn clone(&self) -> Self { *self }
+}
+impl Default for lcb_st {
+    fn default() -> Self { unsafe { zeroed() } }
+}
 pub type lcb_t = *mut lcb_st;
-
-
-// #define LCB_IOPS_DEPRECATED(X) void (*LCB__IOPS_CONCAT(lcb__iops__dummy, __LINE__))(void)
-// #else
-// #define LCB_IOPS_DEPRECATED(X) X
-// #endif
-
-// struct lcb_iops_evented_st {
-//     LCB_IOPS_BASE_FIELDS
-//     LCB_IOPS_DEPRECATED(lcb_ioE_socket_fn socket);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_connect_fn connect);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_recv_fn recv);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_send_fn send);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_recvv_fn recvv);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_sendv_fn sendv);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_close_fn close);
-//     LCB_IOPS_DEPRECATED(lcb_io_timer_create_fn create_timer);
-//     LCB_IOPS_DEPRECATED(lcb_io_timer_destroy_fn destroy_timer);
-//     LCB_IOPS_DEPRECATED(lcb_io_timer_cancel_fn delete_timer);
-//     LCB_IOPS_DEPRECATED(lcb_io_timer_schedule_fn update_timer);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_event_create_fn create_event);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_event_destroy_fn destroy_event);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_event_watch_fn update_event);
-//     LCB_IOPS_DEPRECATED(lcb_ioE_event_cancel_fn delete_event);
-//     LCB_IOPS_DEPRECATED(lcb_io_stop_fn stop_event_loop);
-//     LCB_IOPS_DEPRECATED(lcb_io_start_fn run_event_loop);
-// };
-
-// struct lcb_iops_completion_st {
-//     LCB_IOPS_BASE_FIELDS
-//     LCB_IOPS_DEPRECATED(lcb_ioC_socket_fn create_socket);
-//     LCB_IOPS_DEPRECATED(lcb_ioC_connect_fn start_connect);
-//     LCB_IOPS_DEPRECATED(lcb_ioC_wballoc_fn create_writebuf);
-//     LCB_IOPS_DEPRECATED(lcb_ioC_wbfree_fn release_writebuf);
-//     LCB_IOPS_DEPRECATED(lcb_ioC_write_fn start_write);
-//     LCB_IOPS_DEPRECATED(lcb_ioC_read_fn start_read);
-//     LCB_IOPS_DEPRECATED(lcb_ioC_close_fn close_socket);
-//     LCB_IOPS_DEPRECATED(lcb_io_timer_create_fn create_timer);
-//     LCB_IOPS_DEPRECATED(lcb_io_timer_destroy_fn destroy_timer);
-//     LCB_IOPS_DEPRECATED(lcb_io_timer_cancel_fn delete_timer);
-//     LCB_IOPS_DEPRECATED(lcb_io_timer_schedule_fn update_timer);
-//     LCB_IOPS_DEPRECATED(lcb_ioC_nameinfo_fn get_nameinfo);
-//     void (*pad1)(void);
-//     void (*pad2)(void);
-//     LCB_IOPS_DEPRECATED(void (*send_error)(struct lcb_io_opt_st*, lcb_sockdata_t*,void(*)(lcb_sockdata_t*)));
-//     LCB_IOPS_DEPRECATED(lcb_io_stop_fn stop_event_loop);
-//     LCB_IOPS_DEPRECATED(lcb_io_start_fn run_event_loop);
-// };
-
-// struct lcb_iops2_st {
-//     LCB_IOPS_BASE_FIELDS
-//     lcb_io_procs_fn get_procs;
-//     struct lcbio_TABLE *iot;
-// };
-
-// struct lcb_iops3_st {
-//     LCB_IOPS_BASE_FIELDS
-//     lcb__iops3fndummy pads[17];
-//     lcb_io_procs_fn get_procs;
-//     struct lcbio_TABLE *iot;
-// };
-
-// typedef struct lcb_io_opt_st* lcb_io_opt_t;
-
-// struct lcb_io_opt_st {
-//     int version;
-//     void *dlhandle;
-//     void (*destructor)(struct lcb_io_opt_st *iops);
-//     union {
-//         struct {
-//             LCB_IOPS_BASE_FIELDS
-//         } base;
-
-//         /** These two names are deprecated internally */
-//         struct lcb_iops_evented_st v0;
-//         struct lcb_iops_completion_st v1;
-//         struct lcb_iops2_st v2;
-//         struct lcb_iops3_st v3;
-//     } v;
-// };
 
 #[repr(C)]
 #[derive(Copy)]
@@ -661,19 +487,6 @@ impl Default for lcb_create_st3 {
 
 #[repr(C)]
 #[derive(Copy)]
-pub struct lcb_create_st {
-    pub version: c_int,
-    pub v: lcb_CRST_u,
-}
-impl Clone for lcb_create_st {
-    fn clone(&self) -> Self { *self }
-}
-impl Default for lcb_create_st {
-    fn default() -> Self { unsafe { zeroed() } }
-}
-
-#[repr(C)]
-#[derive(Copy)]
 pub struct lcb_CRST_u {
     pub _data_: [u64; 8usize],
 }
@@ -695,14 +508,27 @@ impl lcb_CRST_u {
         transmute(raw.offset(0))
     }
 }
-#[deprecated]
 impl Clone for lcb_CRST_u {
-    #[deprecated]
     fn clone(&self) -> Self { *self }
 }
 impl Default for lcb_CRST_u {
     fn default() -> Self { unsafe { zeroed() } }
 }
+
+#[repr(C)]
+#[derive(Copy)]
+pub struct lcb_create_st {
+    pub version: c_int,
+    pub v: lcb_CRST_u,
+}
+impl Clone for lcb_create_st {
+    fn clone(&self) -> Self { *self }
+}
+impl Default for lcb_create_st {
+    fn default() -> Self { unsafe { zeroed() } }
+}
+
+
 
 // Variables
 #[link(name = "couchbase")]
@@ -723,7 +549,13 @@ extern "C" {
 // lcb_cntl_setu32() : couchbase.h
 // lcb_cntl_string() : couchbase.h
 // lcb_connect() : couchbase.h
+
 // lcb_create() : couchbase.h
+    pub fn lcb_create(
+        instance: *mut lcb_t,
+        options: *const lcb_create_st
+    ) -> lcb_error_t;
+
 // lcb_create_io_ops() : couchbase.h
 // lcb_destroy() : couchbase.h
 // lcb_destroy_async() : couchbase.h
@@ -848,10 +680,7 @@ extern "C" {
 // lcbvb_vbreplica() : vbucket.h
 
 
-    pub fn lcb_create(
-        instance: *mut lcb_t,
-        options: *const lcb_create_st
-    ) -> lcb_error_t;
+
 
     // pub fn lcb_connect(instance: lcb_t) -> lcb_error_t;
     // pub fn lcb_set_cookie(instance: lcb_t, cookie: *const c_void)

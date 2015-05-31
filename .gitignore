@@ -1,2 +1,6 @@
 .DS_Store
 target
+couchbase-sys/src/tmp_*
+couchbase-sys/src/tmp*
+src/tmp_*
+src/tmp*
