@@ -1,26 +1,29 @@
 include!("../couchbase-sys/src/lib.rs");
 
-use ffi::{
-	lcb_error_t,
-	lcb_t,
-	lcb_create_st,
-};
-// use std::ffi;
+// use ffi;
+use std::ffi::CString;
 
 fn main() {
     println!("Hello, world!");
 
-    let err: lcb_error_t;
-    let instance: lcb_t;
-    let create_options = lcb_create_st { version: 0 };
+    let err: ffi::lcb_error_t;
+    let instance: ffi::lcb_t;
+    let mut create_options = ffi::lcb_create_st { version: 0, v: ffi::lcb_CRST_u { _data_: [0; 8]} };
+    let scmd = ffi::lcb_store_cmd_t { version: 0, v: ffi::lcb_store_cmd_st_u { _data_: [0; 11] } };
+    let scmdlist: *const ffi::lcb_store_cmd_t;
+    let gcmd = ffi::lcb_get_cmd_t { version: 0, v: ffi::lcb_get_cmd_st_u { _data_: [0; 6] } };
+    create_options.version = 3;
 
-    // struct lcb_create_st create_options = { 0 };
-    // lcb_store_cmd_t scmd = { 0 };
-    // const lcb_store_cmd_t *scmdlist[1];
-    // lcb_get_cmd_t gcmd = { 0 };
-    // const lcb_get_cmd_t *gcmdlist[1];
-    // create_options.version = 3;
+    let mut opts = ffi::lcb_create_st3 {
+        connstr: CString::new("couchbase://127.0.0.1:8091/default").unwrap().as_ptr(),
+        passwd: CString::new("").unwrap().as_ptr(),
+        username: CString::new("").unwrap().as_ptr(),
+        _pad_bucket: 0,
+        io: 0,
+        _type: 0,
+    };
 
+    create_options.v.v3() = &opts;
 }
 
 // static void

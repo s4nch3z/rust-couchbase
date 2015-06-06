@@ -1,10 +1,15 @@
-// Enumerations
+/***************
+* Enumerations *
+****************/
+// lcb_iomodel_t : iops.h
 pub enum lcb_iomodel_t {
     LCB_IOMODEL_EVENT,
     LCB_IOMODEL_COMPLETION,
 }
 
-// Type definitions
+/*******************
+* Type definitions *
+********************/
 // lcb_io_connect_cb : iops.h
 pub type lcb_io_connect_cb = Option<extern "C" fn(
     socket: *mut lcb_sockdata_t,
@@ -349,6 +354,8 @@ pub type lcb_ioE_accept_fn = Option<extern "C" fn(
 // lcb_socket_t : iops.h
 pub type lcb_socket_t = c_int;
 
+pub type lcb__iops3fndummy = Option<extern "C" fn() -> ()>;
+
 #[repr(C)]
 #[derive(Copy)]
 pub struct sockaddr;
@@ -362,12 +369,12 @@ impl Default for sockaddr {
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_sockdata_st {
-    socket: lcb_socket_t,
-    parent: lcb_io_opt_t,
-    lcbconn: *mut lcbio_SOCKET,
-    closed: c_int,
-    is_reading: c_int,
-    read_buffer: lcb_buf_info,
+    pub socket: lcb_socket_t,
+    pub parent: lcb_io_opt_t,
+    pub lcbconn: *mut lcbio_SOCKET,
+    pub closed: c_int,
+    pub is_reading: c_int,
+    pub read_buffer: lcb_buf_info,
 }
 impl Clone for lcb_sockdata_st {
     fn clone(&self) -> Self { *self }
@@ -391,8 +398,8 @@ impl Default for lcbio_SOCKET {
 #[derive(Copy)]
 // deprecated
 pub struct lcb_io_writebuf_st {
-    parent: *mut lcb_io_opt_st,
-    buffer: lcb_buf_info,
+    pub parent: *mut lcb_io_opt_st,
+    pub buffer: lcb_buf_info,
 }
 impl Clone for lcb_io_writebuf_st {
     fn clone(&self) -> Self { *self }
@@ -402,14 +409,14 @@ impl Default for lcb_io_writebuf_st {
 }
 pub type lcb_io_writebuf_t = lcb_io_writebuf_st;
 
+// deprecated
 #[repr(C)]
 #[derive(Copy)]
-// deprecated
 pub struct lcb_buf_info {
-    root: *mut c_char,
-    size: lcb_SIZE,
-    ringbuffer: ringbuffer_st,
-    lcb_buf_info: ringbuffer_st,//[2],
+    pub root: *mut c_char,
+    pub size: lcb_SIZE,
+    pub ringbuffer: ringbuffer_st,
+    pub lcb_buf_info: [ringbuffer_st; 2usize],
 }
 impl Clone for lcb_buf_info {
     fn clone(&self) -> Self { *self }
@@ -421,8 +428,8 @@ impl Default for lcb_buf_info {
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_nameinfo_st_s {
-    name: *mut sockaddr,
-    len: *mut c_int,
+    pub name: *mut sockaddr,
+    pub len: *mut c_int,
 }
 impl Clone for lcb_nameinfo_st_s {
     fn clone(&self) -> Self { *self }
@@ -434,8 +441,8 @@ impl Default for lcb_nameinfo_st_s {
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_nameinfo_st {
-    local: lcb_nameinfo_st_s,
-    remote: lcb_nameinfo_st_s,
+    pub local: lcb_nameinfo_st_s,
+    pub remote: lcb_nameinfo_st_s,
 }
 impl Clone for lcb_nameinfo_st {
     fn clone(&self) -> Self { *self }
@@ -458,8 +465,8 @@ impl Default for ringbuffer_st {
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_iovec_st {
-    iov_base: *mut c_void,
-    iov_len: size_t,
+    pub iov_base: *mut c_void,
+    pub iov_len: size_t,
 }
 impl Clone for lcb_iovec_st {
     fn clone(&self) -> Self { *self }
@@ -496,10 +503,10 @@ impl Default for lcbio_TABLE {
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_timerprocs_st {
-    create: lcb_io_timer_create_fn,
-    destroy: lcb_io_timer_destroy_fn,
-    cancel: lcb_io_timer_cancel_fn,
-    schedule: lcb_io_timer_schedule_fn,
+    pub create: lcb_io_timer_create_fn,
+    pub destroy: lcb_io_timer_destroy_fn,
+    pub cancel: lcb_io_timer_cancel_fn,
+    pub schedule: lcb_io_timer_schedule_fn,
 }
 impl Clone for lcb_timerprocs_st {
     fn clone(&self) -> Self { *self }
@@ -512,9 +519,9 @@ pub type lcb_timer_procs = lcb_timerprocs_st;
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_loopprocs_st {
-    start: lcb_io_start_fn,
-    stop: lcb_io_stop_fn,
-    tick: lcb_io_tick_fn,
+    pub start: lcb_io_start_fn,
+    pub stop: lcb_io_stop_fn,
+    pub tick: lcb_io_tick_fn,
 }
 impl Clone for lcb_loopprocs_st {
     fn clone(&self) -> Self { *self }
@@ -527,18 +534,18 @@ pub type lcb_loop_procs = lcb_loopprocs_st;
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_bsdprocs_st {
-    socket0: lcb_ioE_socket_fn,
-    connect0: lcb_ioE_connect_fn,
-    recv: lcb_ioE_recv_fn,
-    recvv: lcb_ioE_recvv_fn,
-    send: lcb_ioE_send_fn,
-    sendv: lcb_ioE_sendv_fn,
-    close: lcb_ioE_close_fn,
-    bind: lcb_ioE_bind_fn,
-    listen: lcb_ioE_listen_fn,
-    accept: lcb_ioE_accept_fn,
-    is_closed: lcb_ioE_chkclosed_fn,
-    cntl: lcb_ioE_cntl_fn,
+    pub socket0: lcb_ioE_socket_fn,
+    pub connect0: lcb_ioE_connect_fn,
+    pub recv: lcb_ioE_recv_fn,
+    pub recvv: lcb_ioE_recvv_fn,
+    pub send: lcb_ioE_send_fn,
+    pub sendv: lcb_ioE_sendv_fn,
+    pub close: lcb_ioE_close_fn,
+    pub bind: lcb_ioE_bind_fn,
+    pub listen: lcb_ioE_listen_fn,
+    pub accept: lcb_ioE_accept_fn,
+    pub is_closed: lcb_ioE_chkclosed_fn,
+    pub cntl: lcb_ioE_cntl_fn,
 }
 impl Clone for lcb_bsdprocs_st {
     fn clone(&self) -> Self { *self }
@@ -551,10 +558,10 @@ pub type lcb_bsd_procs = lcb_bsdprocs_st;
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_evprocs_st {
-    create: lcb_ioE_event_create_fn,
-    destroy: lcb_ioE_event_destroy_fn,
-    cancel: lcb_ioE_event_cancel_fn,
-    watch: lcb_ioE_event_watch_fn,
+    pub create: lcb_ioE_event_create_fn,
+    pub destroy: lcb_ioE_event_destroy_fn,
+    pub cancel: lcb_ioE_event_cancel_fn,
+    pub watch: lcb_ioE_event_watch_fn,
 }
 impl Clone for lcb_evprocs_st {
     fn clone(&self) -> Self { *self }
@@ -567,19 +574,19 @@ pub type lcb_ev_procs = lcb_evprocs_st;
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_completion_procs {
-    socket: lcb_ioC_socket_fn,
-    close: lcb_ioC_close_fn,
-    read: lcb_ioC_read_fn,
-    connect: lcb_ioC_connect_fn,
-    wballoc: lcb_ioC_wballoc_fn,
-    wbfree: lcb_ioC_wbfree_fn,
-    write: lcb_ioC_write_fn,
-    write2: lcb_ioC_write2_fn,
-    read2: lcb_ioC_read2_fn,
-    serve: lcb_ioC_serve_fn,
-    nameinfo: lcb_ioC_nameinfo_fn,
-    is_closed: lcb_ioC_chkclosed_fn,
-    cntl: lcb_ioC_cntl_fn,
+    pub socket: lcb_ioC_socket_fn,
+    pub close: lcb_ioC_close_fn,
+    pub read: lcb_ioC_read_fn,
+    pub connect: lcb_ioC_connect_fn,
+    pub wballoc: lcb_ioC_wballoc_fn,
+    pub wbfree: lcb_ioC_wbfree_fn,
+    pub write: lcb_ioC_write_fn,
+    pub write2: lcb_ioC_write2_fn,
+    pub read2: lcb_ioC_read2_fn,
+    pub serve: lcb_ioC_serve_fn,
+    pub nameinfo: lcb_ioC_nameinfo_fn,
+    pub is_closed: lcb_ioC_chkclosed_fn,
+    pub cntl: lcb_ioC_cntl_fn,
 }
 impl Clone for lcb_completion_procs {
     fn clone(&self) -> Self { *self }
@@ -610,6 +617,9 @@ pub struct lcb_iops3_st {
     pub cookie: *mut c_void,
     pub error: c_int,
     pub need_cleanup: c_int,
+    pub pads: [lcb__iops3fndummy; 17usize],
+    pub get_procs: lcb_io_procs_fn,
+    pub iot: *mut lcbio_TABLE,
 }
 impl Clone for lcb_iops3_st {
     fn clone(&self) -> Self { *self }
@@ -621,7 +631,7 @@ impl Default for lcb_iops3_st {
 #[repr(C)]
 #[derive(Copy)]
 pub struct lcb_io_opt_st_u {
-    pub _data_: [u64; 8usize],
+    pub _data_: [u64; 22usize],
 }
 impl lcb_io_opt_st_u {
     pub unsafe fn base(&mut self) -> *mut lcb_io_opt_st_u_base {
