@@ -3,121 +3,138 @@ include!("../couchbase-sys/src/lib.rs");
 // use ffi;
 use std::ffi::CString;
 
+use std::ffi::CStr;
+use std::str;
+// use libc;
+use std::mem::{
+    transmute,
+    transmute_copy,
+};
+use std::option::Option;
+
 fn main() {
     println!("Hello, world!");
 
-    let err: ffi::lcb_error_t;
-    let instance: ffi::lcb_t;
-    let mut create_options = ffi::lcb_create_st { version: 0, v: ffi::lcb_CRST_u { _data_: [0; 8]} };
-    let scmd = ffi::lcb_store_cmd_t { version: 0, v: ffi::lcb_store_cmd_st_u { _data_: [0; 11] } };
-    let scmdlist: *const ffi::lcb_store_cmd_t;
-    let gcmd = ffi::lcb_get_cmd_t { version: 0, v: ffi::lcb_get_cmd_st_u { _data_: [0; 6] } };
-    create_options.version = 3;
-
-    let mut opts = ffi::lcb_create_st3 {
-        connstr: CString::new("couchbase://127.0.0.1:8091/default").unwrap().as_ptr(),
-        passwd: CString::new("").unwrap().as_ptr(),
-        username: CString::new("").unwrap().as_ptr(),
-        _pad_bucket: 0,
-        io: 0,
-        _type: 0,
+    let mut cropts = ffi::lcb_create_st { ..Default::default() };
+    let connstr = "couchbase://127.0.0.1:8091/default";
+    let create3 = ffi::lcb_create_st3 {
+        connstr: CString::new(connstr.as_bytes()).unwrap().as_ptr(),
+        ..Default::default()
     };
+    cropts.version = 3;
+    unsafe {
+        cropts.v._data_ = transmute_copy(&create3);
+        println!("version: {}", cropts.version);
+       let create32 = &*cropts.v.v3();
+       let slice = CStr::from_ptr(create32.connstr);
+       println!("v.v3.connstr: {}",
+             str::from_utf8(slice.to_bytes()).unwrap());
+        let mut err: ffi::lcb_error_t;
+        let mut instance: ffi::lcb_t = std::mem::uninitialized();
+        err = ffi::lcb_create(&mut instance, &mut cropts);
 
-    create_options.v.v3() = &opts;
+        match err {
+            ffi::lcb_error_t::LCB_SUCCESS => println!("Instance created!"),
+            _ => println!("Couldn't create instance!"),
+        }
+        ffi::lcb_connect(instance);
+        ffi::lcb_wait(instance);
+        err = lcb_get_bootstrap_status(instance);
+        match err {
+            ffi::lcb_error_t::LCB_SUCCESS => println!("Bootstrapped!"),
+            _ => println!("Couldn't bootstrap!"),
+        }
+        // ffi::lcb_set_get_callback(instance, get_callback);
+        //   lcb_set_storage_callback(instance, storage_callback);
+        //   lcb_set_get_callback(instance, get_callback);
+          
+        //   lcb_store_cmd_t scmd = { 0 };
+        //   const lcb_store_cmd_t *scmdlist = &scmd;
+        //   scmd.v.v0.key = "Hello";
+        //   scmd.v.v0.nkey = 5;
+        //   scmd.v.v0.bytes = "World";
+        //   scmd.v.v0.nbytes = 5;
+        //   scmd.v.v0.operation = LCB_SET;
+        //   err = lcb_store(instance, NULL, 1, &scmdlist);
+        //   if (err != LCB_SUCCESS) {
+        //     printf("Couldn't schedule storage operation!\n");
+        //     exit(1);
+        //   }
+        //   lcb_wait(instance); //storage_callback is invoked here
+          
+        //   lcb_get_cmd_t gcmd = { 0 };
+        //   const lcb_get_cmd_t *gcmdlist = &gcmd;
+        //   gcmd.v.v0.key = "Hello";
+        //   gcmd.v.v0.nkey = 5;
+        //   err = lcb_get(instance, NULL, 1, &gcmdlist);
+        //   if (err != LCB_SUCCESS) {
+        //     printf("Coudln't schedule get operation!\n");
+        //     exit(1);
+        //   }
+        //   lcb_wait(instance); // get_callback is invoked here
+        //   lcb_destroy(instance);
+        //   return 0;
+    }
 }
 
 // static void
-// die(lcb_t instance, const char *msg, lcb_error_t err)
+// storage_callback(lcb_t instance, const void *cookie, lcb_storage_t op, lcb_error_t err,
+//   const lcb_store_resp_t *resp)
 // {
-//     fprintf(stderr, "%s. Received code 0x%X (%s)\n",
-//         msg, err, lcb_strerror(instance, err));
-//     exit(EXIT_FAILURE);
+//   printf("Stored %.*s\n", (int)resp->v.v0.nkey, resp->v.v0.key);
 // }
 // static void
-// store_callback(lcb_t instance, const void *cookie,
-//     lcb_storage_t operation, lcb_error_t error, const lcb_store_resp_t *item)
+// get_callback(lcb_t instance, const void *cookie, lcb_error_t err, lcb_get_resp_t *resp)
 // {
-//     if (error == LCB_SUCCESS) {
-//         fprintf(stderr, "=== STORED ===\n");
-//         fprintf(stderr, "KEY: %.*s\n", (int)item->v.v0.nkey, item->v.v0.key);
-//         fprintf(stderr, "CAS: 0x%"PRIx64"\n", item->v.v0.cas);
-//     } else {
-//         die(instance, "Couldn't store item", error);
-//     }
-//     (void)operation;
+//   printf("Retrieved key %.*s\n", (int)resp->v.v0.nkey, resp->v.v0.key);
+//   printf("Value is %.*s\n", (int)resp->v.v0.nbytes, resp->v.v0.bytes);
 // }
-// static void
-// get_callback(lcb_t instance, const void *cookie, lcb_error_t error,
-//     const lcb_get_resp_t *item)
+
+// int main(void)
 // {
-//     if (error == LCB_SUCCESS) {
-//         fprintf(stderr, "=== RETRIEVED ===\n");
-//         fprintf(stderr, "KEY: %.*s\n", (int)item->v.v0.nkey, item->v.v0.key);
-//         fprintf(stderr, "VALUE: %.*s\n", (int)item->v.v0.nbytes, item->v.v0.bytes);
-//         fprintf(stderr, "CAS: 0x%"PRIx64"\n", item->v.v0.cas);
-//         fprintf(stderr, "FLAGS: 0x%x\n", item->v.v0.flags);
-//     } else {
-//         die(instance, "Couldn't retrieve", error);
-//     }
-//     (void)cookie;
-// }
-// int main(int argc, char *argv[])
-// {
-//     lcb_error_t err;
-//     lcb_t instance;
-//     struct lcb_create_st create_options = { 0 };
-//     lcb_store_cmd_t scmd = { 0 };
-//     const lcb_store_cmd_t *scmdlist[1];
-//     lcb_get_cmd_t gcmd = { 0 };
-//     const lcb_get_cmd_t *gcmdlist[1];
-//     create_options.version = 3;
-//     if (argc < 2) {
-//         fprintf(stderr, "Usage: %s couchbase://host/bucket [ password ]\n", argv[0]);
-//         exit(EXIT_FAILURE);
-//     }
-//     create_options.v.v3.connstr = argv[1];
-//     if (argc >= 3) {
-//         create_options.v.v3.passwd = argv[2];
-//     }
-//     err = lcb_create(&instance, &create_options);
-//     if (err != LCB_SUCCESS) {
-//         die(NULL, "Couldn't create couchbase handle", err);
-//     }
-//     err = lcb_connect(instance);
-//     if (err != LCB_SUCCESS) {
-//         die(instance, "Couldn't schedule connection", err);
-//     }
-//     lcb_wait(instance);
-//     err = lcb_get_bootstrap_status(instance);
-//     if (err != LCB_SUCCESS) {
-//         die(instance, "Couldn't bootstrap from cluster", err);
-//     }
-//     /* Assign the handlers to be called for the operation types */
-//     lcb_set_get_callback(instance, get_callback);
-//     lcb_set_store_callback(instance, store_callback);
-//     scmd.v.v0.operation = LCB_SET;
-//     scmd.v.v0.key = "foo"; scmd.v.v0.nkey = 3;
-//     scmd.v.v0.bytes = "bar"; scmd.v.v0.nbytes = 3;
-//     scmdlist[0] = &scmd;
-//     err = lcb_store(instance, NULL, 1, scmdlist);
-//     if (err != LCB_SUCCESS) {
-//         die(instance, "Couldn't schedule storage operation", err);
-//     }
-//     /* The store_callback is invoked from lcb_wait() */
-//     fprintf(stderr, "Will wait for storage operation to complete..\n");
-//     lcb_wait(instance);
-//     /* Now fetch the item back */
-//     gcmd.v.v0.key = "foo";
-//     gcmd.v.v0.nkey = 3;
-//     gcmdlist[0] = &gcmd;
-//     err = lcb_get(instance, NULL, 1, gcmdlist);
-//     if (err != LCB_SUCCESS) {
-//         die(instance, "Couldn't schedule retrieval operation", err);
-//     }
-//     /* Likewise, the get_callback is invoked from here */
-//     fprintf(stderr, "Will wait to retrieve item..\n");
-//     lcb_wait(instance);
-//     /* Now that we're all done, close down the connection handle */
-//     lcb_destroy(instance);
-//     return 0;
+//   struct lcb_create_st cropts = { 0 };
+//   cropts.version = 3;
+//   cropts.v.v3.connstr = "couchbase://localhost/default";
+//   lcb_error_t err;
+//   lcb_t instance;
+//   err = lcb_create(&instance, &cropts);
+//   if (err != LCB_SUCCESS) {
+//     printf("Couldn't create instance!\n");
+//     exit(1);
+//   }
+//   lcb_connect(instance);
+//   lcb_wait(instance);
+//   if ( (err = lcb_get_bootstrap_status(instance)) != LCB_SUCCESS ) {
+//     printf("Couldn't bootstrap!\n");
+//     exit(1);
+//   }
+//   lcb_set_storage_callback(instance, storage_callback);
+//   lcb_set_get_callback(instance, get_callback);
+  
+//   lcb_store_cmd_t scmd = { 0 };
+//   const lcb_store_cmd_t *scmdlist = &scmd;
+//   scmd.v.v0.key = "Hello";
+//   scmd.v.v0.nkey = 5;
+//   scmd.v.v0.bytes = "World";
+//   scmd.v.v0.nbytes = 5;
+//   scmd.v.v0.operation = LCB_SET;
+//   err = lcb_store(instance, NULL, 1, &scmdlist);
+//   if (err != LCB_SUCCESS) {
+//     printf("Couldn't schedule storage operation!\n");
+//     exit(1);
+//   }
+//   lcb_wait(instance); //storage_callback is invoked here
+  
+//   lcb_get_cmd_t gcmd = { 0 };
+//   const lcb_get_cmd_t *gcmdlist = &gcmd;
+//   gcmd.v.v0.key = "Hello";
+//   gcmd.v.v0.nkey = 5;
+//   err = lcb_get(instance, NULL, 1, &gcmdlist);
+//   if (err != LCB_SUCCESS) {
+//     printf("Coudln't schedule get operation!\n");
+//     exit(1);
+//   }
+//   lcb_wait(instance); // get_callback is invoked here
+//   lcb_destroy(instance);
+//   return 0;
 // }
