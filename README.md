@@ -9,7 +9,7 @@ Since RUST announced their first backwards compatible version. I though it would
 High-level binding will come right after.
 
 ## Milestone 1
-1. Implement low-level connect, get and set to couchbase
+1. ~~Implement low-level connect, get and set to couchbase~~
 2. Implement high-level class, connect, get and set
 3. Tests for connect, get and set
 
