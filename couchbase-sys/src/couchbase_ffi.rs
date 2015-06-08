@@ -107,7 +107,7 @@ impl Default for lcb_replica_t {
 }
 
 // lcb_storage_t : couchbase.h
-#[derive(Copy)]
+#[derive(Copy, Debug)]
 pub enum lcb_storage_t {
     LCB_ADD = 0x01,
     LCB_REPLACE = 0x02,
@@ -232,12 +232,19 @@ pub type lcb_flush_callback = Option<extern "C" fn(
 ) -> ()>;
 
 // lcb_get_callback : couchbase.h
-pub type lcb_get_callback = Option<extern "C" fn(
+// TODO: nullable pointer optimization
+// pub type lcb_get_callback = Option<extern "C" fn(
+//     instance: lcb_t,
+//     cookie: *const c_void,
+//     error: lcb_error_t,
+//     resp: *const lcb_get_resp_t
+// ) -> ()>;
+pub type lcb_get_callback = extern "C" fn(
     instance: lcb_t,
     cookie: *const c_void,
     error: lcb_error_t,
     resp: *const lcb_get_resp_t
-) -> ()>;
+) -> ();
 
 // lcb_http_res_callback : couchbase.h
 pub type lcb_http_res_callback = Option<extern "C" fn(
@@ -273,13 +280,21 @@ pub type lcb_stat_callback = Option<extern "C" fn(
 ) -> ()>;
 
 // lcb_store_callback : couchbase.h
-pub type lcb_store_callback = Option<extern "C" fn(
+// TODO: Figure out nullable pointer optimization
+// pub type lcb_store_callback = Option<extern "C" fn(
+//     instance: lcb_t,
+//     cookie: *const c_void,
+//     operation: lcb_storage_t,
+//     error: lcb_error_t,
+//     resp: *const lcb_store_resp_t
+// ) -> ()>;
+pub type lcb_store_callback = extern "C" fn(
     instance: lcb_t,
     cookie: *const c_void,
     operation: lcb_storage_t,
     error: lcb_error_t,
     resp: *const lcb_store_resp_t
-) -> ()>;
+) -> ();
 
 // lcb_timings_callback : couchbase.h
 pub type lcb_timings_callback = Option<extern "C" fn(
